@@ -1,4 +1,3 @@
-use std::collections::VecDeque;
 use std::time::Instant;
 
 fn main() {
@@ -9,55 +8,65 @@ fn main() {
     println!("Output: {}\nDuration: {:?}", output, duration);
 }
 
-fn part_two(input: &str) -> usize {
+fn part_two(input: &str) -> isize {
     let result = input.lines().map(|line| parse_line(line)).sum();
 
     result
 }
 
-fn parse_line(line: &str) -> usize {
+fn parse_line(line: &str) -> isize {
     let mut iter = line.split(": ");
-    let target = iter.next().unwrap().parse::<usize>().unwrap();
-    let mut nums: VecDeque<usize> = iter
+    let target = iter.next().unwrap().parse::<isize>().unwrap();
+    let mut nums: Vec<isize> = iter
         .next()
         .unwrap()
         .split(' ')
-        .map(|el| el.parse::<usize>().unwrap())
+        .map(|el| el.parse::<isize>().unwrap())
         .collect();
 
-    let start_val = nums.pop_front().unwrap();
-
-    if is_valid_equation(&mut nums, target, start_val) {
+    if is_valid_equation(&mut nums, target) {
         return target;
     }
 
     0
 }
 
-fn concat(a: usize, b: usize) -> usize {
-    let a_str = a.to_string();
-    let b_str = b.to_string();
+fn concat(target: &isize, val: &isize) -> isize {
+    let target_str = target.to_string();
+    let val_str = val.to_string();
 
-    let new_num = format!("{a_str}{b_str}");
+    let  new_num = target_str.chars().rev().skip(val_str.len()).collect::<String>();
+    let new_num = new_num.chars().rev().collect::<String>();
 
-    new_num.parse::<usize>().unwrap()
+    new_num.parse::<isize>().unwrap()
 }
 
-fn is_valid_equation(nums: &mut VecDeque<usize>, target: usize, current_value: usize) -> bool {
+fn is_valid_equation(nums: &mut Vec<isize>, target: isize) -> bool {
     if nums.is_empty() {
-        return current_value == target;
-    } else if current_value > target {
+        return target == 0;
+    } else if target < 0 {
         return false;
     }
-    let val = nums.pop_front().unwrap();
 
-    is_valid_equation(&mut nums.clone(), target, current_value.clone() + val)
-        || is_valid_equation(&mut nums.clone(), target, current_value.clone() * val)
-        || is_valid_equation(
-            &mut nums.clone(),
-            target,
-            concat(current_value.clone(), val),
-        )
+    let val = nums.pop().unwrap();
+
+    let should_multiply = target % val == 0;
+    let should_concat = target.to_string().ends_with(&val.to_string());
+
+    if should_multiply {
+        if should_concat {
+            return is_valid_equation(&mut nums.clone(), target.clone() - val)
+                || is_valid_equation(&mut nums.clone(), target.clone() / val)
+                || is_valid_equation(&mut nums.clone(), concat(&target.clone(), &val));
+        }
+        return is_valid_equation(&mut nums.clone(), target.clone() - val)
+            || is_valid_equation(&mut nums.clone(), target.clone() / val);
+    } else if should_concat {
+        return is_valid_equation(&mut nums.clone(), target.clone() - val)
+            || is_valid_equation(&mut nums.clone(), concat(&target.clone(), &val));
+    }
+
+    is_valid_equation(&mut nums.clone(), target.clone() - val)
 }
 
 #[cfg(test)]

@@ -1,4 +1,3 @@
-use std::collections::VecDeque;
 use std::time::Instant;
 
 fn main() {
@@ -9,42 +8,44 @@ fn main() {
     println!("Output: {}\nDuration: {:?}", output, duration);
 }
 
-fn part_one(input: &str) -> usize {
+fn part_one(input: &str) -> isize {
     let result = input.lines().map(|line| parse_line(line)).sum();
 
     result
 }
 
-fn parse_line(line: &str) -> usize {
+fn parse_line(line: &str) -> isize {
     let mut iter = line.split(": ");
-    let target = iter.next().unwrap().parse::<usize>().unwrap();
-    let mut nums: VecDeque<usize> = iter
+    let target = iter.next().unwrap().parse::<isize>().unwrap();
+    let mut nums: Vec<isize> = iter
         .next()
         .unwrap()
         .split(' ')
-        .map(|el| el.parse::<usize>().unwrap())
+        .map(|el| el.parse::<isize>().unwrap())
         .collect();
 
-    let start_val = nums.pop_front().unwrap();
-
-    if is_valid_equation(&mut nums, target, start_val) {
+    if is_valid_equation(&mut nums, target) {
         return target;
     }
 
     0
 }
 
-fn is_valid_equation(nums: &mut VecDeque<usize>, target: usize, current_value: usize) -> bool {
+fn is_valid_equation(nums: &mut Vec<isize>, target: isize) -> bool {
     if nums.is_empty() {
-        return current_value == target;
-    } else if current_value > target {
+        return target == 0;
+    } else if target < 0 {
         return false;
     }
 
-    let val = nums.pop_front().unwrap();
+    let val = nums.pop().unwrap();
 
-    is_valid_equation(&mut nums.clone(), target, current_value.clone() + val)
-        || is_valid_equation(&mut nums.clone(), target, current_value.clone() * val)
+    if target % val == 0 {
+        return is_valid_equation(&mut nums.clone(), target.clone() - val)
+        || is_valid_equation(&mut nums.clone(), target.clone() / val)
+    }
+
+    is_valid_equation(&mut nums.clone(), target.clone() - val)
 }
 
 #[cfg(test)]
