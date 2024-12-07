@@ -77,7 +77,7 @@ fn part_two(input: &str) -> usize {
 
         match seen_positions.insert(pos) {
             true => grid[pos[1]][pos[0]] = '#',
-            false => (),
+            false => continue,
         }
 
         let mut clone_seen_positions: HashSet<(usize, usize, char)> = HashSet::new();
