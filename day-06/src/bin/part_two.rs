@@ -65,38 +65,38 @@ impl Guard {
 }
 
 fn part_two(input: &str) -> usize {
-    let grid: Vec<Vec<char>> = input.lines().map(|line| line.chars().collect()).collect();
-    let guard = Guard::new(&grid);
-
+    let mut grid: Vec<Vec<char>> = input.lines().map(|line| line.chars().collect()).collect();
+    let mut seen_positions: HashSet<[usize; 2]> = HashSet::new();
+    let mut guard = Guard::new(&grid);
     let mut loops = 0;
 
-    for y_idx in 0..grid.len() {
-        for x_idx in 0..grid[0].len() {
-            let mut grid_clone = grid.clone();
+    while guard.on_grid {
+        let mut guard_clone = guard.clone();
+        guard.move_guard(&grid);
+        let pos = guard.position;
 
-            if grid_clone[y_idx][x_idx] == '#' || grid_clone[y_idx][x_idx] == '^' {
-                continue;
-            }
+        match seen_positions.insert(pos) {
+            true => grid[pos[1]][pos[0]] = '#',
+            false => (),
+        }
 
-            grid_clone[y_idx][x_idx] = '#';
+        let mut clone_seen_positions: HashSet<(usize, usize, char)> = HashSet::new();
 
-            let mut guard_clone = guard.clone();
-            let mut seen_positions: HashSet<(usize, usize, char)> = HashSet::new();
-
-            while guard_clone.on_grid {
-                match seen_positions.insert((
-                    guard_clone.position[0],
-                    guard_clone.position[1],
-                    guard_clone.guard,
-                )) {
-                    true => guard_clone.move_guard(&grid_clone),
-                    false => {
-                        loops += 1;
-                        break;
-                    }
+        while guard_clone.on_grid {
+            match clone_seen_positions.insert((
+                guard_clone.position[0],
+                guard_clone.position[1],
+                guard_clone.guard,
+            )) {
+                true => guard_clone.move_guard(&grid),
+                false => {
+                    loops += 1;
+                    break;
                 }
             }
         }
+
+        grid[pos[1]][pos[0]] = '.';
     }
 
     loops
