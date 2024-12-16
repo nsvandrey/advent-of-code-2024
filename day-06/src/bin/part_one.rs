@@ -1,9 +1,12 @@
 use std::collections::HashSet;
+use std::time::Instant;
 
 fn main() {
+    let start = Instant::now();
     let input = include_str!("./input.txt");
     let output = part_one(input);
-    dbg!(output);
+    let duration = start.elapsed();
+    println!("Output: {}\nDuration: {:?}", output, duration);
 }
 
 struct Guard {

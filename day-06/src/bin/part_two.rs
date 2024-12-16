@@ -1,9 +1,12 @@
 use std::collections::HashSet;
+use std::time::Instant;
 
 fn main() {
+    let start = Instant::now();
     let input = include_str!("./input.txt");
     let output = part_two(input);
-    dbg!(output);
+    let duration = start.elapsed();
+    println!("Output: {}\nDuration: {:?}", output, duration);
 }
 
 #[derive(Clone)]
